@@ -161,7 +161,16 @@ RUN set -ex \
   && rm -rf /usr/local/etc/php/conf.d/docker-php-ext-propro.ini \
   && printf "\n" | pecl install redis-2.2.8 timezonedb imagick mongodb xdebug \
   && docker-php-ext-enable redis timezonedb imagick mongodb xdebug \
-  && docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo filter ftp gd gettext gmp hash iconv imap interbase intl json ldap mbstring mcrypt mysql mysqli oci8 odbc opcache pcntl pdo pdo_dblib pdo_firebird pdo_mysql pdo_oci pdo_odbc pdo_pgsql pdo_sqlite pgsql phar posix pspell readline recode reflection session shmop simplexml snmp soap sockets spl standard sysvmsg sysvsem sysvshm tidy tokenizer wddx xml xmlreader xmlrpc xmlwriter xsl zip \
+  && docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo filter ftp gettext gmp hash iconv imap interbase intl json ldap mbstring mcrypt mysql mysqli oci8 odbc opcache pcntl pdo pdo_dblib pdo_firebird pdo_mysql pdo_oci pdo_odbc pdo_pgsql pdo_sqlite pgsql phar posix pspell readline recode reflection session shmop simplexml snmp soap sockets spl standard sysvmsg sysvsem sysvshm tidy tokenizer wddx xml xmlreader xmlrpc xmlwriter xsl zip \
+  && apk add --no-cache freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev \
+  && docker-php-ext-configure gd \
+    --with-gd \
+    --with-freetype-dir=/usr/include/ \
+    --with-png-dir=/usr/include/ \
+    --with-jpeg-dir=/usr/include/ \
+  && NPROC=$(getconf _NPROCESSORS_ONLN) \
+  && docker-php-ext-install -j${NPROC} gd \
+  && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev \
   && cd /tmp \
   && wget -O /tmp/newrelic.tar.gz http://download.newrelic.com/php_agent/archive/6.4.0.163/newrelic-php5-6.4.0.163-linux.tar.gz \
   && mkdir /opt \
