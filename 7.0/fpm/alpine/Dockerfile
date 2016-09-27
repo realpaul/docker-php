@@ -152,7 +152,7 @@ RUN set -ex \
 
 # Paul Customized Start
 RUN set -ex \
-  && apk add --no-cache bash build-base wget curl m4 autoconf libtool imagemagick imagemagick-dev zlib zlib-dev libcurl curl-dev libevent libevent-dev libidn libidn-dev \
+  && apk add --no-cache bash build-base wget curl m4 autoconf libtool imagemagick imagemagick-dev zlib zlib-dev libcurl curl-dev libevent libevent-dev libidn libidn-dev libmcrypt libmcrypt-dev \
   && printf "\n" | pecl install raphf propro \
   && docker-php-ext-enable raphf propro \
   && printf "\n" | pecl install pecl_http \
