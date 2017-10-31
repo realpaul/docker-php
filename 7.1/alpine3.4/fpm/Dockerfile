@@ -195,7 +195,8 @@ RUN set -ex \
 
 # Paul Customized Start
 RUN set -ex \
-  && apk add --no-cache bash build-base wget curl m4 autoconf libtool imagemagick imagemagick-dev zlib zlib-dev libcurl curl-dev libevent libevent-dev libidn libidn-dev libmcrypt libmcrypt-dev \
+  && apk add --no-cache --virtual .build-deps build-base m4 autoconf libtool  imagemagick-dev  zlib-dev  curl-dev  libevent-dev  libidn-dev  libmcrypt-dev \
+  && apk add --no-cache --virtual .run-deps bash wget curl imagemagick zlib libcurl libevent libidn libmcrypt \
   && printf "\n" | pecl install raphf propro \
   && docker-php-ext-enable raphf propro \
   && printf "\n" | pecl install pecl_http \
@@ -219,6 +220,7 @@ RUN set -ex \
   && php -r "if (hash_file('SHA384', 'composer-setup.php') === 'e115a8dc7871f15d853148a7fbac7da27d6c0030b848d9b3dc09e2a0388afed865e6a3d6b3c0fad45c48e2b5fc1196ae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); exit(1); } echo PHP_EOL;" \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
   && php -r "unlink('composer-setup.php');" \
+	&& apk del .build-deps \
   && rm -rf /tmp/*
 # Paul Customized End
 
