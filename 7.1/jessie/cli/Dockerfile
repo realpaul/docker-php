@@ -1,4 +1,10 @@
-FROM debian:%%DEBIAN_SUITE%%
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "update.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
+FROM debian:jessie
 
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
@@ -38,11 +44,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
 
-ENV GPG_KEYS %%GPG_KEYS%%
+ENV GPG_KEYS A917B1ECDA84AEC2B568FED6F50ABC807BD5DCD0 528995BFEDFBA7191D46839EF9BA0ADA31CBD89E
 
-ENV PHP_VERSION %%PHP_VERSION%%
-ENV PHP_URL="%%PHP_URL%%" PHP_ASC_URL="%%PHP_ASC_URL%%"
-ENV PHP_SHA256="%%PHP_SHA256%%" PHP_MD5="%%PHP_MD5%%"
+ENV PHP_VERSION 7.1.11
+ENV PHP_URL="https://secure.php.net/get/php-7.1.11.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.1.11.tar.xz.asc/from/this/mirror"
+ENV PHP_SHA256="074093e9d7d21afedc5106904218a80a47b854abe368d2728ed22184c884893e" PHP_MD5=""
 
 RUN set -xe; \
 	\
