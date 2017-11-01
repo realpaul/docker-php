@@ -204,7 +204,7 @@ RUN set -ex \
 	&& FOLDER=`pwd` \
 	&& docker-php-source extract \
 	&& cd /usr/src/php/ext/odbc \
-	&& phpize \
+	&& docker-php-ext-configure odbc; phpize \
 	&& sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
 	&& ./configure --with-unixODBC=shared,/usr \
 	&& cd $FOLDER \
