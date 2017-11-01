@@ -198,18 +198,21 @@ RUN set -ex \
 # Paul Customized Start
 RUN set -ex \
 	# Missing extensions: filter interbase oci8 pdo_firebird pdo_oci recode reflection spl standard tidy
-	&& apk add --no-cache --virtual .build-deps bzip2-dev curl-dev libxml2-dev enchant-dev openssl-dev gettext-dev gmp-dev imap-dev icu-dev openldap-dev libmcrypt-dev unixodbc-dev freetds-dev postgresql-dev sqlite-dev aspell-dev libedit-dev recode-dev libxml2-dev net-snmp-dev libxslt-dev zlib-dev libtool imagemagick-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libvpx-dev libwebp-dev \
-	&& docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo ftp gettext gmp hash iconv imap intl json ldap mbstring mcrypt mysqli opcache pcntl pdo pdo_dblib pdo_mysql pdo_pgsql pdo_sqlite pgsql phar posix pspell readline session shmop simplexml snmp sockets sysvmsg sysvshm tokenizer wddx xml xmlrpc xmlwriter xsl zip \
-	&& CFLAGS="-I/usr/src/php" docker-php-ext-install xmlreader \
-	&& FOLDER=`pwd` \
+	&& apk add --no-cache --virtual .build-deps m4 autoconf bzip2-dev curl-dev libxml2-dev enchant-dev openssl-dev gettext-dev gmp-dev imap-dev icu-dev openldap-dev libmcrypt-dev unixodbc-dev freetds-dev postgresql-dev sqlite-dev aspell-dev libedit-dev recode-dev libxml2-dev net-snmp-dev libxslt-dev zlib-dev libtool imagemagick-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libvpx-dev libwebp-dev \
 	&& docker-php-source extract \
-	&& cd /usr/src/php/ext/odbc \
-	&& docker-php-ext-configure odbc; phpize \
-	&& sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-	&& ./configure --with-unixODBC=shared,/usr \
-	&& cd $FOLDER \
+	&& { \
+		echo '# https://github.com/docker-library/php/issues/103#issuecomment-271413933'; \
+		echo 'AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl'; \
+		echo; \
+		cat /usr/src/php/ext/odbc/config.m4; \
+	} > test.m4 \
+	&& mv test.m4 /usr/src/php/ext/odbc/config.m4 \
+	&& docker-php-ext-configure odbc --with-unixODBC=shared,/usr \
 	&& docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr \
 	&& docker-php-ext-install odbc pdo_odbc \
+	&& docker-php-source delete \
+	&& docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo ftp gettext gmp hash iconv imap intl json ldap mbstring mcrypt mysqli opcache pcntl pdo pdo_dblib pdo_mysql pdo_pgsql pdo_sqlite pgsql phar posix pspell readline session shmop simplexml snmp sockets sysvmsg sysvshm tokenizer wddx xml xmlrpc xmlwriter xsl zip \
+	&& CFLAGS="-I/usr/src/php" docker-php-ext-install xmlreader \
 	&& printf "\n" | pecl install raphf propro freetype libpng libjpeg-turbo \
 	&& docker-php-ext-enable raphf propro \
 	&& printf "\n" | pecl install pecl_http \
