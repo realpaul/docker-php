@@ -213,7 +213,7 @@ RUN set -ex \
 	&& docker-php-source delete \
 	&& docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo ftp gettext gmp hash iconv imap intl json ldap mbstring mcrypt mysqli opcache pcntl pdo pdo_dblib pdo_mysql pdo_pgsql pdo_sqlite pgsql phar posix pspell readline session shmop simplexml snmp sockets sysvmsg sysvshm tokenizer wddx xml xmlrpc xmlwriter xsl zip \
 	&& CFLAGS="-I/usr/src/php" docker-php-ext-install xmlreader \
-	&& printf "\n" | pecl install raphf propro freetype libpng libjpeg-turbo \
+	&& printf "\n" | pecl install raphf propro \
 	&& docker-php-ext-enable raphf propro \
 	&& printf "\n" | pecl install pecl_http \
 	&& echo -e "extension=raphf.so\nextension=propro.so\nextension=http.so" > /usr/local/etc/php/conf.d/docker-php-ext-http.ini \
