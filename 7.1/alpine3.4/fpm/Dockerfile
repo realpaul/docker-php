@@ -198,7 +198,7 @@ RUN set -ex \
 # Paul Customized Start
 RUN set -ex \
 	# Missing extensions: filter interbase oci8 pdo_firebird pdo_oci recode reflection spl standard tidy
-	&& apk add --no-cache --virtual .build-deps m4 autoconf bzip2-dev curl-dev libxml2-dev enchant-dev openssl-dev gettext-dev gmp-dev imap-dev icu-dev openldap-dev libmcrypt-dev unixodbc-dev freetds-dev postgresql-dev sqlite-dev aspell-dev libedit-dev recode-dev libxml2-dev net-snmp-dev libxslt-dev zlib-dev libtool imagemagick-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libvpx-dev libwebp-dev \
+	&& apk add --no-cache --virtual .build-deps build-base m4 autoconf bzip2-dev curl-dev libxml2-dev enchant-dev openssl-dev gettext-dev gmp-dev imap-dev icu-dev openldap-dev libmcrypt-dev unixodbc-dev freetds-dev postgresql-dev sqlite-dev aspell-dev libedit-dev recode-dev libxml2-dev net-snmp-dev libxslt-dev zlib-dev libtool imagemagick-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libvpx-dev libwebp-dev \
 	&& docker-php-source extract \
 	&& { \
 		echo '# https://github.com/docker-library/php/issues/103#issuecomment-271413933'; \
