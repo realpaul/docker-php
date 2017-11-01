@@ -80,6 +80,8 @@ RUN set -xe; \
 		wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
 		export GNUPGHOME="$(mktemp -d)"; \
 		for key in $GPG_KEYS; do \
+			gpg --keyserver pgp.mit.edu --recv-keys "$key" || \
+			gpg --keyserver keyserver.pgp.com --recv-keys "$key" || \
 			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
 		done; \
 		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
@@ -195,33 +197,41 @@ RUN set -ex \
 
 # Paul Customized Start
 RUN set -ex \
-  && apk add --no-cache --virtual .build-deps build-base m4 autoconf libtool  imagemagick-dev  zlib-dev  curl-dev  libevent-dev  libidn-dev  libmcrypt-dev pcre-dev \
-  && apk add --no-cache --virtual .run-deps bash wget curl imagemagick zlib libcurl libevent libidn libmcrypt pcre \
-  && printf "\n" | pecl install raphf propro \
-  && docker-php-ext-enable raphf propro \
-  && printf "\n" | pecl install pecl_http \
-  && echo -e "extension=raphf.so\nextension=propro.so\nextension=http.so" > /usr/local/etc/php/conf.d/docker-php-ext-http.ini \
-  && rm -rf /usr/local/etc/php/conf.d/docker-php-ext-raphf.ini \
-  && rm -rf /usr/local/etc/php/conf.d/docker-php-ext-propro.ini \
-  && printf "\n" | pecl install redis timezonedb imagick mongodb xdebug \
-  && docker-php-ext-enable redis timezonedb imagick mongodb xdebug \
-  && docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo filter ftp gettext gmp hash iconv imap interbase intl json ldap mbstring mcrypt mysqli oci8 odbc opcache pcntl pdo pdo_dblib pdo_firebird pdo_mysql pdo_oci pdo_odbc pdo_pgsql pdo_sqlite pgsql phar posix pspell readline recode reflection session shmop simplexml snmp soap sockets spl standard sysvmsg sysvsem sysvshm tidy tokenizer wddx xml xmlreader xmlrpc xmlwriter xsl zip \
-  && apk add --no-cache freetype libpng libjpeg-turbo freetype-dev libpng-dev libjpeg-turbo-dev \
-  && docker-php-ext-configure gd \
-    --with-gd \
-    --with-freetype-dir=/usr/include/ \
-    --with-png-dir=/usr/include/ \
-    --with-jpeg-dir=/usr/include/ \
-  && NPROC=$(getconf _NPROCESSORS_ONLN) \
-  && docker-php-ext-install -j${NPROC} gd \
-  && apk del --no-cache freetype-dev libpng-dev libjpeg-turbo-dev \
-  && cd /tmp \
-  && php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-  && php -r "if (hash_file('SHA384', 'composer-setup.php') === 'e115a8dc7871f15d853148a7fbac7da27d6c0030b848d9b3dc09e2a0388afed865e6a3d6b3c0fad45c48e2b5fc1196ae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); exit(1); } echo PHP_EOL;" \
-  && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-  && php -r "unlink('composer-setup.php');" \
+	# Missing extensions: filter interbase oci8 pdo_firebird pdo_oci recode reflection spl standard tidy
+	&& apk add --no-cache --virtual .build-deps bzip2-dev curl-dev libxml2-dev enchant-dev openssl-dev gettext-dev gmp-dev imap-dev icu-dev openldap-dev libmcrypt-dev unixodbc-dev freetds-dev postgresql-dev sqlite-dev aspell-dev libedit-dev recode-dev libxml2-dev net-snmp-dev libxslt-dev zlib-dev libtool imagemagick-dev freetype-dev libpng-dev libjpeg-turbo-dev libxpm-dev libvpx-dev libwebp-dev \
+	&& docker-php-ext-install bcmath bz2 calendar ctype curl dba dom enchant exif fileinfo ftp gettext gmp hash iconv imap intl json ldap mbstring mcrypt mysqli opcache pcntl pdo pdo_dblib pdo_mysql pdo_pgsql pdo_sqlite pgsql phar posix pspell readline session shmop simplexml snmp sockets sysvmsg sysvshm tokenizer wddx xml xmlrpc xmlwriter xsl zip \
+	&& CFLAGS="-I/usr/src/php" docker-php-ext-install xmlreader \
+	&& FOLDER=`pwd` \
+	&& docker-php-source extract \
+	&& cd /usr/src/php/ext/odbc \
+	&& phpize \
+	&& sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
+	&& ./configure --with-unixODBC=shared,/usr \
+	&& cd $FOLDER \
+	&& docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr \
+	&& docker-php-ext-install odbc pdo_odbc \
+	&& printf "\n" | pecl install raphf propro freetype libpng libjpeg-turbo \
+	&& docker-php-ext-enable raphf propro \
+	&& printf "\n" | pecl install pecl_http \
+	&& echo -e "extension=raphf.so\nextension=propro.so\nextension=http.so" > /usr/local/etc/php/conf.d/docker-php-ext-http.ini \
+	&& rm -rf /usr/local/etc/php/conf.d/docker-php-ext-raphf.ini \
+	&& rm -rf /usr/local/etc/php/conf.d/docker-php-ext-propro.ini \
+	&& printf "\n" | pecl install redis timezonedb imagick mongodb xdebug \
+	&& docker-php-ext-enable redis timezonedb imagick mongodb xdebug \
+	&& docker-php-ext-configure gd \
+		--with-gd \
+		--with-freetype-dir=/usr/include/ \
+		--with-png-dir=/usr/include/ \
+		--with-jpeg-dir=/usr/include/ \
+	&& NPROC=$(getconf _NPROCESSORS_ONLN) \
+	&& docker-php-ext-install -j${NPROC} gd \
+	&& cd /tmp \
+	&& php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+	&& php -r "if (hash_file('SHA384', 'composer-setup.php') === '544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" \
+	&& php composer-setup.php \
+	&& php -r "unlink('composer-setup.php');" \
 	&& apk del .build-deps \
-  && rm -rf /tmp/*
+	&& rm -rf /tmp/*
 # Paul Customized End
 
 EXPOSE 9000
